@@ -1,22 +1,27 @@
 const inquirer = require('inquirer')
 require('console.table');
 const mysql = require('mysql2')
+
+
 const connection = require('./config/connection');
 
 
-const init = async () => {
+const startApp = async () => {
     console.log(`
-    ──────███─█───█─████─█───████─██─██─███─███──────
-    ──────█───██─██─█──█─█───█──█──███──█───█────────
-    ──────███─█─█─█─████─█───█──█───█───███─███──────
-    ──────█───█───█─█────█───█──█───█───█───█────────
-    ──────███─█───█─█────███─████───█───███─███──────
+
+    ███████╗███╗░░░███╗██████╗░██╗░░░░░░█████╗░██╗░░░██╗███████╗███████╗
+    ██╔════╝████╗░████║██╔══██╗██║░░░░░██╔══██╗╚██╗░██╔╝██╔════╝██╔════╝
+    █████╗░░██╔████╔██║██████╔╝██║░░░░░██║░░██║░╚████╔╝░█████╗░░█████╗░░
+    ██╔══╝░░██║╚██╔╝██║██╔═══╝░██║░░░░░██║░░██║░░╚██╔╝░░██╔══╝░░██╔══╝░░
+    ███████╗██║░╚═╝░██║██║░░░░░███████╗╚█████╔╝░░░██║░░░███████╗███████╗
+    ╚══════╝╚═╝░░░░░╚═╝╚═╝░░░░░╚══════╝░╚════╝░░░░╚═╝░░░╚══════╝╚══════╝
     
-    ──────█───█─████─█──█─████─████─███─████─────────
-    ──────██─██─█──█─██─█─█──█─█────█───█──█─────────
-    ──────█─█─█─████─█─██─████─█─██─███─████─────────
-    ──────█───█─█──█─█──█─█──█─█──█─█───█─█──────────
-    ──────█───█─█──█─█──█─█──█─████─███─█─█──────────
+    ███╗░░░███╗░█████╗░███╗░░██╗░█████╗░░██████╗░███████╗██████╗░
+    ████╗░████║██╔══██╗████╗░██║██╔══██╗██╔════╝░██╔════╝██╔══██╗
+    ██╔████╔██║███████║██╔██╗██║███████║██║░░██╗░█████╗░░██████╔╝
+    ██║╚██╔╝██║██╔══██║██║╚████║██╔══██║██║░░╚██╗██╔══╝░░██╔══██╗
+    ██║░╚═╝░██║██║░░██║██║░╚███║██║░░██║╚██████╔╝███████╗██║░░██║
+    ╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝╚═╝░░╚═╝░╚═════╝░╚══════╝╚═╝░░╚═╝
     
     `)
 
@@ -28,7 +33,7 @@ const promptUser = async () => {
     const answers = await inquirer.prompt([{
         type: 'list',
         name: 'choices',
-        message: 'Choose an action',
+        message: 'What would you like to do?',
         choices: [
             'VIEW all Departments',
             'VIEW all Roles',
@@ -38,7 +43,7 @@ const promptUser = async () => {
     }
     ]);
 
-     if (answers.choices === 'VIEW all Departments') {
+    if (answers.choices === 'VIEW all Departments') {
         await viewAllDepartments();
     } else if (answers.choices === 'VIEW all Roles') {
         await viewAllRoles();
@@ -53,15 +58,14 @@ const promptUser = async () => {
 };
 
 // Function to view all departments
-const viewAllDepartments = async () => {
-    try {
-        const [results] = await connection.promise().query(
-            'SELECT * FROM department')
-            promptUser();
-        console.table(results)
-    } catch (err) {
-        throw new Error(err)
-    }
+const viewAllDepartments = () => {
+    const query = `SELECT * FROM department`;
+    connection.query(query, (err, department) => {
+        if (err) throw err;
+        console.table(department);
+        promptUser();
+
+    });
 };
 
 // Function to view all roles
@@ -69,8 +73,9 @@ const viewAllRoles = async () => {
     try {
         const [results] = await connection.promise().query(
             'SELECT * FROM role')
-            promptUser();
         console.table(results)
+        promptUser();
+
     } catch (err) {
         throw new Error(err)
     }
@@ -81,16 +86,13 @@ const viewAllEmployees = async () => {
     try {
         const [results] = await connection.promise().query(
             'SELECT * FROM employee')
-            promptUser();
         console.table(results)
+        promptUser();
     } catch (err) {
         throw new Error(err)
     }
 };
 
 
-
-
-
 // Start the application 
-init();
+startApp();
