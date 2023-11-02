@@ -41,6 +41,7 @@ const promptUser = async () => {
             'ADD a Department',
             'ADD a Role',
             'ADD an Employee',
+            'UPDATE Employees',
             'EXIT'
         ]
     }
@@ -58,6 +59,8 @@ const promptUser = async () => {
         await addRole();
     } else if (answers.choices === 'ADD an Employee') {
         await addEmployee();
+    } else if (answers.choices === 'UPDATE Employees') { // Add this condition to prompt user for employee role update
+        await updateEmployeeRole();
     } else if (answers.choices === 'EXIT') {
         connection.end(); // Close the DB connection
         console.log('Goodbye!');
@@ -121,7 +124,6 @@ const addDepartment = async () => {
         promptUser();
     }
 };
-
 
 // Function to add a role
 const addRole = async () => {
@@ -188,7 +190,48 @@ const addEmployee = async () => {
     }
 };
 
+// Function to update an employee's role
+const updateEmployeeRole = async () => {
+    try {
+        const employees = await connection.promise().query('SELECT * FROM employee');
+        const employeeChoices = employees[0].map(employee => ({
+            name: `${employee.first_name} ${employee.last_name}`,
+            value: employee.id
+        }));
 
+        const roles = await connection.promise().query('SELECT * FROM role');
+        const roleChoices = roles[0].map(role => ({
+            name: role.title,
+            value: role.id
+        }));
+
+        const { employeeId, roleId } = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'employeeId',
+                message: 'Select the employee to update:',
+                choices: employeeChoices
+            },
+            {
+                type: 'list',
+                name: 'roleId',
+                message: 'Select the new role for the employee:',
+                choices: roleChoices
+            }
+        ]);
+
+        await connection.promise().query(
+            'UPDATE employee SET role_id = ? WHERE id = ?',
+            [roleId, employeeId]
+        );
+
+        console.log('Employee role updated successfully!');
+        promptUser();
+    } catch (err) {
+        console.error('Error updating employee role:', err);
+        promptUser();
+    }
+};
 
 
 
